@@ -16,8 +16,16 @@ from sklearn.neural_network import MLPClassifier
 
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+
+import os
 import pickle
 
+
+ARTIFACTS_DIR = "artifacts"
+FIGURES_DIR = os.path.join("reports", "figures")
+
+os.makedirs(ARTIFACTS_DIR, exist_ok=True)
+os.makedirs(FIGURES_DIR, exist_ok=True)
 
 
 # Load Dataset
@@ -34,12 +42,12 @@ numeric_df = df.select_dtypes(include=[np.number])
 plt.figure(figsize=(10,6))
 sns.heatmap(numeric_df.corr(), annot=True, cmap='Blues')
 plt.title("Correlation Heatmap of Numerical Features")
-plt.savefig('correlation_heatmap.png')
+plt.savefig(os.path.join(FIGURES_DIR, "correlation_heatmap.png"))
 plt.close()
 
 plt.figure()
 sns.countplot(x='diabetes', data=df)
-plt.savefig('diabetes_distribution.png')
+plt.savefig(os.path.join(FIGURES_DIR, "diabetes_distribution.png"))
 plt.close()
 
 
@@ -53,11 +61,11 @@ print(f"\nAfter dropping duplicates: {df.shape}")
 
 colmnsNumerical = ['age', 'bmi', 'HbA1c_level', 'blood_glucose_level', 'hypertension', 'heart_disease'] # Missing Values
 for col in colmnsNumerical:
-  df[col].fillna(df[col].median(), inplace=True)
+    df[col].fillna(df[col].median(), inplace=True)
 
 colmnsCatagorical = ['gender', 'smoking_history']
 for col in colmnsCatagorical:
-  df[col].fillna(df[col].mode()[0], inplace=True)
+    df[col].fillna(df[col].mode()[0], inplace=True)
 
 df.dropna(subset=['diabetes'], inplace=True)
 df['diabetes'] = df['diabetes'].astype(int)
@@ -77,7 +85,7 @@ fig = plt.figure(figsize=(12,8))
 df[num_cols].hist(figsize=(12,8), bins=30)
 plt.suptitle("Distribution of Numerical Features")
 plt.tight_layout()
-plt.savefig('feature_distributions.png')
+plt.savefig(os.path.join(FIGURES_DIR, "feature_distributions.png"))
 plt.close()
 
 
@@ -146,29 +154,29 @@ print("Scaler scale:", scaler.scale_)
 # Model Training
 print("\n=== Training Models ===")
 
-# Logistic Regression
-lr = LogisticRegression(max_iter=1000)
-lr.fit(X_train_scaled, y_train)
-lr_pred = lr.predict(X_test_scaled)
-print(f"Logistic Regression trained. Sample predictions: {lr_pred[:10]}")
+# # Logistic Regression
+# lr = LogisticRegression(max_iter=1000)
+# lr.fit(X_train_scaled, y_train)
+# lr_pred = lr.predict(X_test_scaled)
+# print(f"Logistic Regression trained. Sample predictions: {lr_pred[:10]}")
 
-# Decision Tree
-dt = DecisionTreeClassifier(max_depth=6)
-dt.fit(X_train_scaled, y_train)
-dt_pred = dt.predict(X_test_scaled)
-print(f"Decision Tree trained. Sample predictions: {dt_pred[:10]}")
+# # Decision Tree
+# dt = DecisionTreeClassifier(max_depth=6)
+# dt.fit(X_train_scaled, y_train)
+# dt_pred = dt.predict(X_test_scaled)
+# print(f"Decision Tree trained. Sample predictions: {dt_pred[:10]}")
 
-# Naive Bayes
-nb = GaussianNB()
-nb.fit(X_train_scaled, y_train)
-nb_pred = nb.predict(X_test_scaled)
-print(f"Naive Bayes trained. Sample predictions: {nb_pred[:10]}")
+# # Naive Bayes
+# nb = GaussianNB()
+# nb.fit(X_train_scaled, y_train)
+# nb_pred = nb.predict(X_test_scaled)
+# print(f"Naive Bayes trained. Sample predictions: {nb_pred[:10]}")
 
-# KNN
-knn = KNeighborsClassifier(n_neighbors=5)
-knn.fit(X_train_scaled, y_train)
-knn_pred = knn.predict(X_test_scaled)
-print(f"KNN trained. Sample predictions: {knn_pred[:10]}")
+# # KNN
+# knn = KNeighborsClassifier(n_neighbors=5)
+# knn.fit(X_train_scaled, y_train)
+# knn_pred = knn.predict(X_test_scaled)
+# print(f"KNN trained. Sample predictions: {knn_pred[:10]}")
 
 # Neural Network
 nn = MLPClassifier(hidden_layer_sizes=(64,32), max_iter=500, random_state=42)
@@ -180,10 +188,10 @@ print(f"Neural Network trained. Sample predictions: {nn_pred[:10]}")
 
 # Model Selection & Comparison Analysis
 models_obj = {
-    "Logistic Regression": lr,
-    "Decision Tree": dt,
-    "KNN": knn,
-    "Naive Bayes": nb,
+    # "Logistic Regression": lr,
+    # "Decision Tree": dt,
+    # "KNN": knn,
+    # "Naive Bayes": nb,
     "Neural Network": nn
 }
 results = {}
@@ -201,7 +209,7 @@ plt.ylabel("Accuracy")
 plt.title("Model Accuracy Comparison")
 plt.xticks(rotation=45)
 plt.tight_layout()
-plt.savefig('model_comparison.png')
+plt.savefig(os.path.join(FIGURES_DIR, "model_comparison.png"))
 plt.close()
 
 # Precision & Recall Comparison
@@ -224,7 +232,7 @@ for name, model in models_obj.items():
     plt.title(f"Confusion Matrix - {name}")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
-    plt.savefig(f'confusion_matrix_{name.replace(" ", "_")}.png')
+    plt.savefig(os.path.join(FIGURES_DIR, f"confusion_matrix_{name.replace(' ', '_')}.png"))
     plt.close()
 
 # ROC Curve + AUC Score
@@ -242,7 +250,7 @@ plt.xlabel("False Positive Rate")
 plt.ylabel("True Positive Rate")
 plt.title("ROC Curve Comparison")
 plt.legend()
-plt.savefig('roc_curves.png')
+plt.savefig(os.path.join(FIGURES_DIR, "roc_curves.png"))
 plt.close()
 
 
@@ -269,7 +277,7 @@ plt.plot(K, wcss, marker='o')
 plt.xlabel('Number of Clusters (k)')
 plt.ylabel('WCSS')
 plt.title('Elbow Method for Optimal k')
-plt.savefig('elbow_method.png')
+plt.savefig(os.path.join(FIGURES_DIR, "elbow_method.png"))
 plt.close()
 
 pca = PCA(n_components=2)
@@ -281,7 +289,7 @@ clusters = kmeans.fit_predict(X_pca)
 plt.figure()
 plt.scatter(X_pca[:,0], X_pca[:,1], c=clusters, cmap='viridis', s=10)
 plt.title("KMeans Clustering (Numerical Features, PCA Reduced)")
-plt.savefig('kmeans_clustering.png')
+plt.savefig(os.path.join(FIGURES_DIR, "kmeans_clustering.png"))
 plt.close()
 
 # Select best model based on accuracy
@@ -307,27 +315,27 @@ if hasattr(best_model, "predict_proba"):
 print("\n=== Saving Model and Artifacts ===")
 
 # Save best model
-with open("model.pkl", "wb") as f:
+with open(os.path.join(ARTIFACTS_DIR, "model.pkl"), "wb") as f:
     pickle.dump(best_model, f)
-print("✅ model.pkl saved")
+print("✅ artifacts/model.pkl saved")
 
 # Save scaler
-with open("scaler.pkl", "wb") as f:
+with open(os.path.join(ARTIFACTS_DIR, "scaler.pkl"), "wb") as f:
     pickle.dump(scaler, f)
-print("✅ scaler.pkl saved")
+print("✅ artifacts/scaler.pkl saved")
 
 # Save feature order
-with open("feature_order.pkl", "wb") as f:
+with open(os.path.join(ARTIFACTS_DIR, "feature_order.pkl"), "wb") as f:
     pickle.dump(FEATURE_ORDER, f)
-print("✅ feature_order.pkl saved")
+print("✅ artifacts/feature_order.pkl saved")
 
 # Save label encoders
-with open("label_encoders.pkl", "wb") as f:
+with open(os.path.join(ARTIFACTS_DIR, "label_encoders.pkl"), "wb") as f:
     pickle.dump({
         'gender': lE_gender,
         'smoking_history': lE_smoking
     }, f)
-print("✅ label_encoders.pkl saved")
+print("✅ artifacts/label_encoders.pkl saved")
 
 # Save model metadata
 metadata = {
@@ -338,8 +346,7 @@ metadata = {
     'smoking_mapping': dict(zip(lE_smoking.classes_, lE_smoking.transform(lE_smoking.classes_))),
     'all_results': results
 }
-
-with open("model_metadata.pkl", "wb") as f:
+with open(os.path.join(ARTIFACTS_DIR, "model_metadata.pkl"), "wb") as f:
     pickle.dump(metadata, f)
 print("✅ model_metadata.pkl saved")
 

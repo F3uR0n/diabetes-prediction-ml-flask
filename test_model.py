@@ -7,7 +7,7 @@ print("="*60)
 
 # Load model
 try:
-    model = pickle.load(open("model.pkl", "rb"))
+    model = pickle.load(open("artifacts/model.pkl", "rb"))
     print(f"\n✅ Model loaded successfully")
     print(f"   Type: {type(model).__name__}")
     print(f"   Has predict_proba: {hasattr(model, 'predict_proba')}")
@@ -17,7 +17,7 @@ except Exception as e:
 
 # Load scaler
 try:
-    scaler = pickle.load(open("scaler.pkl", "rb"))
+    scaler = pickle.load(open("artifacts/scaler.pkl", "rb"))
     print(f"\n✅ Scaler loaded successfully")
     print(f"   Features: {scaler.n_features_in_}")
     print(f"   Mean: {scaler.mean_}")
