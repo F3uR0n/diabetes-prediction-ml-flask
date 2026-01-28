@@ -7,7 +7,6 @@ import traceback
 app = Flask(__name__)
 app.secret_key = "dev-secret"
 
-# 🔥 PATH FIX (ONLY ADDITION)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ARTIFACTS_DIR = os.path.join(BASE_DIR, "artifacts")
 
@@ -43,22 +42,21 @@ try:
         print(f"⚠️ Using fallback feature order: {FEATURE_ORDER}")
 
     # Load label encoders
-    try:
-        label_encoders = pickle.load(
-            open(os.path.join(ARTIFACTS_DIR, "label_encoders.pkl"), "rb")
-        )
-        print(f"✅ Label encoders loaded")
-        print(
-            f"   Gender mapping: "
-            f"{dict(zip(label_encoders['gender'].classes_, label_encoders['gender'].transform(label_encoders['gender'].classes_)))}"
-        )
-        print(
-            f"   Smoking mapping: "
-            f"{dict(zip(label_encoders['smoking_history'].classes_, label_encoders['smoking_history'].transform(label_encoders['smoking_history'].classes_)))}"
-        )
-    except FileNotFoundError:
-        label_encoders = None
-        print(f"⚠️ Label encoders not found - using raw integer values")
+    label_encoders = pickle.load(
+        open(os.path.join(ARTIFACTS_DIR, "label_encoders.pkl"), "rb")
+    )
+    print(f"✅ Label encoders loaded")
+    
+    # 🔥 CREATE REVERSE MAPPINGS FOR THE FORM
+    gender_encoder = label_encoders['gender']
+    smoking_encoder = label_encoders['smoking_history']
+    
+    # Get the actual mappings
+    gender_mapping = dict(zip(gender_encoder.classes_, gender_encoder.transform(gender_encoder.classes_)))
+    smoking_mapping = dict(zip(smoking_encoder.classes_, smoking_encoder.transform(smoking_encoder.classes_)))
+    
+    print(f"   Gender mapping: {gender_mapping}")
+    print(f"   Smoking mapping: {smoking_mapping}")
 
     # Load metadata
     try:
@@ -89,15 +87,21 @@ def index():
             print("NEW PREDICTION REQUEST")
             print("=" * 60)
 
-            # Read form inputs
+            # Read form inputs AS STRINGS FIRST
             age = float(request.form["age"])
             bmi = float(request.form["bmi"])
             hba1c = float(request.form["hba1c"])
             glucose = float(request.form["glucose"])
             hypertension = int(request.form["hypertension"])
             heart_disease = int(request.form["heart_disease"])
-            gender = int(request.form["gender"])
-            smoking = int(request.form["smoking"])
+            
+            # 🔥 USE LABEL ENCODERS TO TRANSFORM TEXT VALUES
+            gender_text = request.form["gender"]  # This will be like "Male" or "Female"
+            smoking_text = request.form["smoking"]  # This will be like "never" or "current"
+            
+            # Transform using the actual encoders
+            gender = gender_encoder.transform([gender_text])[0]
+            smoking = smoking_encoder.transform([smoking_text])[0]
 
             print("\nRaw form inputs:")
             print(f"  Age: {age}")
@@ -106,8 +110,8 @@ def index():
             print(f"  Glucose: {glucose}")
             print(f"  Hypertension: {hypertension}")
             print(f"  Heart Disease: {heart_disease}")
-            print(f"  Gender: {gender}")
-            print(f"  Smoking: {smoking}")
+            print(f"  Gender (text): {gender_text} → Encoded: {gender}")
+            print(f"  Smoking (text): {smoking_text} → Encoded: {smoking}")
 
             input_dict = {
                 'gender': gender,
@@ -158,11 +162,15 @@ def index():
     prediction = session.pop("prediction", None)
     probability = session.pop("probability", None)
 
+    # 🔥 PASS THE MAPPINGS TO THE TEMPLATE
     return render_template(
         "index.html",
         prediction=prediction,
-        probability=probability
+        probability=probability,
+        gender_options=sorted(gender_encoder.classes_),
+        smoking_options=sorted(smoking_encoder.classes_)
     )
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
+    
