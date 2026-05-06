@@ -1,132 +1,126 @@
-# 🩺 Real World Diabetes Prediction (Machine Learning)
+# Real World Diabetes Prediction (Machine Learning + Flask)
 
-A real-world machine learning project that predicts whether a person has diabetes based on health data using Python.
-This project covers the complete ML workflow: data preprocessing, model training, evaluation, and testing.
+A production-style machine learning workflow for diabetes risk prediction, packaged with a Flask web interface. The project includes data preprocessing, model training and selection, evaluation, and a UI that serves predictions from saved artifacts.
 
----
+## Overview
 
-## 📌 Project Overview
+This project trains multiple supervised classifiers on a diabetes dataset, selects the best model based on F1 score for the diabetic class using a Youden threshold, and exposes a web form where users can input clinical parameters to receive a risk prediction. The training pipeline also generates evaluation visuals and persists all artifacts needed for inference.
 
-The goal of this project is to apply machine learning techniques to medical data to build a predictive model for diabetes.
-It demonstrates practical usage of multiple ML algorithms, data processing, and evaluation metrics on real-world data.
+## Web Interface
 
----
+The Flask app provides a clean, form-based UI and shows risk percentage, risk level, and key indicators. The interface is implemented in [templates/index.html](templates/index.html) and styled in [static/style.css](static/style.css).
 
-## 🛠️ Tech Stack
+## Visuals
 
-* **Python 3.x**
-* **Libraries:**
+Below are the evaluation and analysis plots generated during training:
 
-  * NumPy
-  * Pandas
-  * Scikit-learn
-  * Matplotlib / Seaborn
-* **Web Components:** HTML, CSS, Flask
+![Correlation heatmap](reports/figures/correlation_heatmap.png)
+![Diabetes distribution](reports/figures/diabetes_distribution.png)
+![Feature distributions](reports/figures/feature_distributions.png)
+![Model comparison](reports/figures/model_comparison.png)
+![ROC curves](reports/figures/roc_curves.png)
+![Elbow method](reports/figures/elbow_method.png)
+![KMeans clustering](reports/figures/kmeans_clustering.png)
 
----
+## Models Used
 
-## 📁 Project Structure
+Training compares the following supervised models:
+
+- Logistic Regression
+- Decision Tree
+- Gaussian Naive Bayes
+- K-Nearest Neighbors
+- Neural Network (MLP)
+
+For each model, probabilities are evaluated with ROC curves and a Youden-optimal threshold. The best model is selected by F1 score on the diabetic class and saved to artifacts for inference.
+
+Unsupervised exploration is included with KMeans clustering on numerical features (PCA-reduced) to visualize structure.
+
+## Testing and Evaluation
+
+The training script evaluates models using:
+
+- Accuracy, Precision, Recall, F1
+- Confusion Matrix
+- ROC Curve and AUC
+
+The diagnostic script [test_model.py](test_model.py) loads the saved model and scaler and runs three test profiles (high, medium, low risk) to validate inference behavior.
+
+## Project Structure
 
 ```
-real-world-diabetes-prediction-ml/
-│
+real-world-diabetes-prediction-ml-flask/
 ├── artifacts/
-│   └── .pkl [files]
-│   └── .pkl [files]
-│   └── .pkl [files]
-│
+│   ├── feature_order.pkl
+│   ├── label_encoders.pkl
+│   ├── model.pkl
+│   ├── model_metadata.pkl
+│   └── scaler.pkl
 ├── reports/
 │   └── figures/
-│       └── .png [files]
-│       └── .png [files]
-│       └── .png [files]
-│
+│       ├── correlation_heatmap.png
+│       ├── diabetes_distribution.png
+│       ├── feature_distributions.png
+│       ├── model_comparison.png
+│       ├── roc_curves.png
+│       ├── elbow_method.png
+│       └── kmeans_clustering.png
 ├── static/
 │   └── style.css
-│
 ├── templates/
 │   └── index.html
-│
-├── app.py                  # Main application / interface
-├── train_model.py          # Model training script
-├── test_model.py           # Evaluation/testing script
-├── diabetes_dataset.csv    # Dataset for model
+├── app.py
+├── diabetes_dataset.csv
+├── test_model.py
+├── train_model.py
 └── README.md
 ```
 
----
+## How to Run
 
-## 🧠 Machine Learning Concepts Used
+1) Create and activate a virtual environment (optional but recommended).
+2) Install dependencies.
+3) Train the model to generate artifacts.
+4) Run the Flask app.
 
-* 📊 **Exploratory Data Analysis (EDA)** & **Correlation Analysis**
-* 🧹 **Data Preprocessing & Cleaning**
-* 🔢 **Label Encoding** & **Train–Test Split**
-* 🤖 **Supervised Learning Models**
-  * Logistic Regression
-  * Decision Tree
-  * Naive Bayes
-  * K-Nearest Neighbors (KNN)
-  * Neural Network
+```bash
+pip install -r requirements.txt
+python train_model.py
+python app.py
+```
 
-* 🌀 **Unsupervised Learning Exploration**
-  * K-Means (for dataset insight)
+Then open http://localhost:5000 in your browser.
 
-* 📈 **Model Evaluation Metrics**
-  * Accuracy
-  * Precision
-  * Recall
-  * Confusion Matrix
-  * ROC Curve & AUC Score
+## Inference Details
 
-* ⚖️ **Overfitting Detection & Performance Analysis**
+The Flask app loads these artifacts from [artifacts/](artifacts/):
 
----
+- `model.pkl` (best model)
+- `scaler.pkl` (StandardScaler)
+- `feature_order.pkl` (feature alignment)
+- `label_encoders.pkl` (gender and smoking history encoders)
+- `model_metadata.pkl` (model name, accuracy, F1, threshold)
 
-## 📈 Model Workflow
+Prediction uses the Youden-optimal threshold saved during training rather than the default 0.5.
 
-1. Load and preprocess data
-2. Split into training and testing sets
-3. Train multiple machine learning models
-4. Evaluate metrics and compare performance
-5. Select the best model
-6. Optionally expose as a prediction interface
+## Data and Features
 
----
+Inputs used for prediction:
 
-## 🚧 Limitations
+- gender
+- age
+- hypertension
+- heart_disease
+- smoking_history
+- bmi
+- HbA1c_level
+- blood_glucose_level
 
-* Dataset[Artificial data so far] may be limited or imbalanced
-* No clinical validation
-* Performance depends on feature quality
-* Interpretations should be used for learning only
+## Notes and Limitations
 
----
+- The dataset is imbalanced; evaluation prioritizes recall and F1 for the diabetic class.
+- This project is for educational use and is not a clinical tool.
 
-## 🌱 Future Improvements
+## License
 
-* Hyperparameter tuning
-* Deployment to web or mobile app
-* Add explainable AI (SHAP / LIME)
-* Cross-validation and better sampling
-* Additional advanced models
-
----
-
-## 🎯 Purpose of This Project
-
-This project was developed to:
-
-* Practice **real machine learning workflows**
-* Apply ML models on **real health data**
-* Strengthen skills in **data preprocessing and evaluation**
-* Build a **portfolio-ready ML project**
-
----
-
-## 📜 License
-
-This project is open-source and intended for **educational and academic use only**.
-
----
-
-### ⭐ If you find this project helpful, consider giving it a star!
+Educational and academic use only.
