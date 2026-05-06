@@ -1,141 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Diabetes Risk Prediction</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DiabetesAI — Risk Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<div class="container">
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <svg class="brand-hex" viewBox="0 0 40 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 1L38 11V35L20 45L2 35V11L20 1Z" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="20" cy="23" r="6" fill="currentColor" opacity="0.7"/>
+        </svg>
+        <span class="brand-name">DiabetesAI</span>
+      </div>
+      <p class="header-tagline">Clinical Risk Assessment System</p>
+    </div>
+  </header>
 
-    <!-- FORM -->
-    <div class="card form-card">
-        <h2>🩺 Diabetes Risk Predictor</h2>
-        <p class="subtitle">AI-powered health assessment</p>
+  <!-- MAIN -->
+  <main class="container">
 
-        <form method="POST">
-            <div class="grid">
+    <!-- FORM CARD -->
+    <section class="card form-card">
+      <div class="card-header">
+        <div class="card-title-wrap">
+          <span class="card-dot"></span>
+          <h2 class="card-title">Health Parameters</h2>
+        </div>
+        <p class="card-desc">Enter your clinical data for AI-powered risk analysis</p>
+      </div>
 
-                <div>
-                    <label>Age</label>
-                    <input type="number" name="age" required>
-                </div>
+      <form method="POST" id="predForm">
+        <div class="input-grid">
 
-                <div>
-                    <label>BMI</label>
-                    <input type="number" step="0.1" name="bmi" required>
-                </div>
+          <div class="input-group">
+            <label class="input-label" for="age">Age <span class="unit">years</span></label>
+            <input class="input-field" type="number" id="age" name="age"
+              min="1" max="120" placeholder="e.g. 45" required>
+          </div>
 
-                <div>
-                    <label>HbA1c (%)</label>
-                    <input type="number" step="0.1" name="hba1c" required>
-                </div>
+          <div class="input-group">
+            <label class="input-label" for="bmi">BMI <span class="unit">kg/m²</span></label>
+            <input class="input-field" type="number" step="0.1" id="bmi" name="bmi"
+              min="10" max="80" placeholder="e.g. 24.5" required>
+          </div>
 
-                <div>
-                    <label>Blood Glucose</label>
-                    <input type="number" name="glucose" required>
-                </div>
+          <div class="input-group">
+            <label class="input-label" for="hba1c">HbA1c Level <span class="unit">%</span></label>
+            <input class="input-field" type="number" step="0.1" id="hba1c" name="hba1c"
+              min="3" max="15" placeholder="e.g. 5.7" required>
+          </div>
 
-                <div>
-                    <label>Hypertension</label>
-                    <select name="hypertension">
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </select>
-                </div>
+          <div class="input-group">
+            <label class="input-label" for="glucose">Blood Glucose <span class="unit">mg/dL</span></label>
+            <input class="input-field" type="number" id="glucose" name="glucose"
+              min="50" max="500" placeholder="e.g. 120" required>
+          </div>
 
-                <div>
-                    <label>Heart Disease</label>
-                    <select name="heart_disease">
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </select>
-                </div>
+          <div class="input-group">
+            <label class="input-label">Gender</label>
+            <select class="input-field" name="gender">
+              {% for option in gender_options %}
+              <option value="{{ option }}">{{ option }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-                <div>
-                    <label>Gender</label>
-                    <select name="gender">
-                        {% for option in gender_options %}
-                        <option value="{{ option }}">{{ option }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+          <div class="input-group">
+            <label class="input-label">Smoking History</label>
+            <select class="input-field" name="smoking">
+              {% for option in smoking_options %}
+              <option value="{{ option }}">{{ option | title }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-                <div>
-                    <label>Smoking History</label>
-                    <select name="smoking">
-                        {% for option in smoking_options %}
-                        <option value="{{ option }}">{{ option }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+          <div class="input-group">
+            <label class="input-label">Hypertension</label>
+            <select class="input-field" name="hypertension">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label">Heart Disease</label>
+            <select class="input-field" name="heart_disease">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span class="btn-text">Analyze Risk</span>
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </form>
+    </section>
+
+    <!-- RESULT CARD -->
+    <section class="card result-card">
+      <div class="card-header">
+        <div class="card-title-wrap">
+          <span class="card-dot"></span>
+          <h2 class="card-title">Risk Analysis</h2>
+        </div>
+        <p class="card-desc">AI-powered diabetes risk prediction</p>
+      </div>
+
+      {% if prediction and probability is not none and 'Error' not in prediction %}
+        {% set rl = risk_level or 'medium' %}
+        {% set circ = 282.74 %}
+        {% set ring_offset = (circ * (1 - probability / 100)) | round(2) %}
+
+        <div class="result-body animate-in">
+
+          <!-- RADIAL PROGRESS RING -->
+          <div class="ring-wrap">
+            <svg class="risk-ring" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <circle class="ring-track" cx="60" cy="60" r="45"/>
+              <circle class="ring-fill risk-stroke-{{ rl }}" cx="60" cy="60" r="45"
+                style="--target: {{ ring_offset }}"/>
+            </svg>
+            <div class="ring-center">
+              <span class="ring-pct risk-color-{{ rl }}">{{ probability }}%</span>
+              <span class="ring-sub">RISK</span>
+            </div>
+          </div>
+
+          <!-- STATUS BADGE -->
+          <div class="status-badge badge-{{ rl }}">
+            {% if rl == 'high' %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+              High Risk
+            {% elif rl == 'medium' %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              Moderate Risk
+            {% else %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Low Risk
+            {% endif %}
+          </div>
+
+          <!-- DIAGNOSIS LABEL -->
+          <p class="diagnosis risk-color-{{ rl }}">
+            {% if prediction == 'Diabetic' %}Diabetic{% else %}Non-Diabetic{% endif %}
+          </p>
+
+          <!-- KEY RISK FACTORS -->
+          {% if input_summary %}
+          <div class="factors-section">
+            <p class="factors-title">Key Indicators</p>
+            <div class="factors-grid">
+
+              <div class="factor {% if input_summary.glucose >= 180 %}factor-warn{% elif input_summary.glucose >= 140 %}factor-caution{% else %}factor-ok{% endif %}">
+                <span class="factor-label">Glucose</span>
+                <span class="factor-val">{{ input_summary.glucose }} <span class="factor-unit">mg/dL</span></span>
+              </div>
+
+              <div class="factor {% if input_summary.hba1c >= 6.5 %}factor-warn{% elif input_summary.hba1c >= 5.7 %}factor-caution{% else %}factor-ok{% endif %}">
+                <span class="factor-label">HbA1c</span>
+                <span class="factor-val">{{ input_summary.hba1c }}<span class="factor-unit">%</span></span>
+              </div>
+
+              <div class="factor {% if input_summary.bmi >= 30 %}factor-warn{% elif input_summary.bmi >= 25 %}factor-caution{% else %}factor-ok{% endif %}">
+                <span class="factor-label">BMI</span>
+                <span class="factor-val">{{ input_summary.bmi }}</span>
+              </div>
+
+              <div class="factor {% if input_summary.hypertension %}factor-warn{% else %}factor-ok{% endif %}">
+                <span class="factor-label">Hypertension</span>
+                <span class="factor-val">{{ 'Yes' if input_summary.hypertension else 'No' }}</span>
+              </div>
 
             </div>
+          </div>
+          {% endif %}
 
-            <button type="submit">Predict Risk</button>
-        </form>
-    </div>
+          <p class="disclaimer">For informational purposes only — consult a physician.</p>
 
-    <!-- RESULT -->
-    <div class="card result-card">
-        <h2>📊 Prediction Result</h2>
+        </div>
 
-        {% if prediction %}
-            <div class="result {{ 'danger' if 'Diabetic' in prediction else 'safe' }}">
-                {{ prediction }}
-            </div>
-        {% else %}
-            <p class="muted">Submit data to see prediction</p>
-        {% endif %}
+      {% elif prediction and 'Error' in prediction %}
+        <div class="empty-state">
+          <div class="empty-icon error-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p class="empty-title">Prediction Error</p>
+          <p class="empty-desc">{{ prediction }}</p>
+        </div>
 
-        {% if probability is not none %}
-            <p class="prob-text">
-                Risk Probability: <strong>{{ probability }}%</strong>
-            </p>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <p class="empty-title">No Analysis Yet</p>
+          <p class="empty-desc">Fill in your health parameters and click<br><em>Analyze Risk</em> to see your results.</p>
+        </div>
+      {% endif %}
 
-            <!-- SAFE DATA PASSING -->
-            <canvas id="riskChart"
-                data-risk="{{ probability }}">
-            </canvas>
-        {% endif %}
-    </div>
+    </section>
 
-</div>
+  </main>
 
-<footer>
-    <p>Built with ❤️ using Flask & Machine Learning</p>
-</footer>
+  <footer class="site-footer">
+    <p>Built with Flask &amp; Machine Learning &mdash; Educational use only</p>
+  </footer>
 
-<!-- SAFE JS (NO JINJA LOGIC) -->
-<script>
-    const chartCanvas = document.getElementById("riskChart");
-
-    if (chartCanvas) {
-        const risk = Number(chartCanvas.dataset.risk);
-        const safe = 100 - risk;
-
-        new Chart(chartCanvas, {
-            type: "doughnut",
-            data: {
-                labels: ["Risk", "Safe"],
-                datasets: [{
-                    data: [risk, safe],
-                    backgroundColor: ["#e74c3c", "#2ecc71"],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                cutout: "70%",
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
-    }
-</script>
+  <script>
+    document.getElementById('predForm').addEventListener('submit', function () {
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.querySelector('.btn-text').textContent = 'Analyzing...';
+    });
+  </script>
 
 </body>
 </html>
